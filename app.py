@@ -7,16 +7,54 @@ import os
 import cv2
 from werkzeug.utils import secure_filename
 
+import xlrd
+
+UPLOAD_FOLDER = 'uploads/'
+ALLOWED_EXTENSIONS = {'xls'}
+
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'shivam5606'
 app.config['MYSQL_DB'] = 'pythonProject'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = "safehouse"
 
 mysql = MySQL(app)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml') 
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def upload_file(file):
+	msg=""
+	savepath=""
+	if file and allowed_file(file.filename):
+		filename = secure_filename(file.filename)
+		savepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+		file.save(savepath)
+		msg="File saved"
+	return msg, savepath
+
+def saveToDb(qid1,file):
+	cursor = mysql.connection.cursor()
+	excel_sheet = xlrd.open_workbook(file)
+	sheet_name = excel_sheet.sheet_names()
+	insert_query = "INSERT INTO questions (qid,question,op1,op2,op3,op4,cans) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+	for sh in range(0,len(sheet_name)):
+		sheet= excel_sheet.sheet_by_index(sh)		
+		for r in range(1,sheet.nrows):
+			question = sheet.cell(r,0).value
+			op1 = sheet.cell(r,1).value
+			op2 = sheet.cell(r,2).value		
+			op3 = sheet.cell(r,3).value		
+			op4 = sheet.cell(r,4).value			
+			cans = sheet.cell(r,5).value			
+			vals = (qid1,question,op1,op2,op3,op4,cans)
+			cursor.execute(insert_query,vals)
+			mysql.connection.commit()
+	cursor.close()
 
 @app.route('/login', methods = ['GET', 'POST'])
 def teacherLogin():
@@ -36,6 +74,7 @@ def teacherLogin():
 			if logdata:
 				session['loggedin'] = True
 				session['name'] = logdata[1]
+				session['uid']=logdata[0]
 				return redirect('/')
 			else:
 				msg = "Incorrect username or password !! "
@@ -50,9 +89,31 @@ def home():
 		return redirect('/login')
 
 
+
 @app.route('/createQuiz', methods = ['GET', 'POST'])
 def createQuiz():
-    return render_template("creatQuiz.html")
+	if 'loggedin' in session:
+		msg=''
+		if request.method == 'POST':
+			details = request.form
+			uid=session['uid']
+			name=details['quizname']
+			time=details['time']
+			file=request.files['questionsfile']
+			qid1=random.randint(10000000,99999999)
+			msg,filepath=upload_file(file)
+			print(msg)
+			saveToDb(qid1,filepath)
+			cursor = mysql.connection.cursor()
+			cursor.execute("insert into quizes (id, quizid, quizname, time) values (%s,%s,%s,%s)",(uid,qid1,name,time))
+			mysql.connection.commit()
+			cursor.close()
+			msg="Quiz created successfully!"
+			return render_template("creatQuiz.html",msg=msg)
+		return render_template("creatQuiz.html",msg=msg)
+	else:
+		return redirect('/login')
+    
 
 
 @app.route('/logout')

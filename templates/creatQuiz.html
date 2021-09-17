@@ -15,7 +15,7 @@
         {% else %}
             <span style="color: red;">{{ msg }}</span>
         {% endif %}
-        <form method="POST" action="/teacherLogin">
+        <form method="POST" enctype=multipart/form-data action="/createQuiz">
             <div>
                 <input type="text" name="quizname" required>
                 <label>Quizname</label>
