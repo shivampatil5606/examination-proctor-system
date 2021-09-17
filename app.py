@@ -7,10 +7,10 @@ import os
 import cv2
 from werkzeug.utils import secure_filename
 
-import xlrd
+from pyexcel_xls import get_data
 
 UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = {'xls'}
+ALLOWED_EXTENSIONS = {'xls','xlsx', 'xlsm'}
 
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
@@ -39,21 +39,18 @@ def upload_file(file):
 
 def saveToDb(qid1,file):
 	cursor = mysql.connection.cursor()
-	excel_sheet = xlrd.open_workbook(file)
-	sheet_name = excel_sheet.sheet_names()
+	excel_sheet = get_data(file)
 	insert_query = "INSERT INTO questions (qid,question,op1,op2,op3,op4,cans) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-	for sh in range(0,len(sheet_name)):
-		sheet= excel_sheet.sheet_by_index(sh)		
-		for r in range(1,sheet.nrows):
-			question = sheet.cell(r,0).value
-			op1 = sheet.cell(r,1).value
-			op2 = sheet.cell(r,2).value		
-			op3 = sheet.cell(r,3).value		
-			op4 = sheet.cell(r,4).value			
-			cans = sheet.cell(r,5).value			
-			vals = (qid1,question,op1,op2,op3,op4,cans)
-			cursor.execute(insert_query,vals)
-			mysql.connection.commit()
+	for lst in excel_sheet['Sheet1']:
+		question = lst[0]
+		op1 = lst[1]
+		op2 = lst[2]	
+		op3 = lst[3]		
+		op4 = lst[4]		
+		cans = lst[5]			
+		vals = (question,op1,op2,op3,op4,cans)
+		cursor.execute(insert_query,vals)
+		mysql.connection.commit()
 	cursor.close()
 
 @app.route('/login', methods = ['GET', 'POST'])
