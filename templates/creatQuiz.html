@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Proctor System</title>
+</head>
+<body bgcolor="#66b3f2">
+    <div>
+        <h2>Login</h2>
+        {% if msg=="" %}
+            {{ continue }}
+        {% elif msg=="Quiz created successfully!" %}
+            <span style="color: green;">{{ msg }}</span>
+        {% else %}
+            <span style="color: red;">{{ msg }}</span>
+        {% endif %}
+        <form method="POST" action="/teacherLogin">
+            <div>
+                <input type="text" name="quizname" required>
+                <label>Quizname</label>
+            </div>
+            <div>
+                <input type="text" name="time" required>
+                <label>Time</label>
+            </div>
+            <div>
+                <input type="file" name="questionsfile" required>
+                <label>Question File</label>
+            </div>
+            <div>
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+
+
+</body>
+</html>

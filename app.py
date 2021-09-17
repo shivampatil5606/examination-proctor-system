@@ -10,8 +10,8 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = ''
+app.config['MYSQL_PASSWORD'] = 'shivam5606'
+app.config['MYSQL_DB'] = 'pythonProject'
 
 app.secret_key = "safehouse"
 
@@ -20,15 +20,46 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 @app.route('/login', methods = ['GET', 'POST'])
 def teacherLogin():
-    return render_template("teacherLogin.html")
+	if 'loggedin' in session:
+		return redirect('/')
+	else:
+		msg = ""
+		if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
+			details = request.form
+			email = details['email']
+			password = details['password']
+			cur = mysql.connection.cursor()
+			cur.execute('select * from teachers where email = %s and password = %s', (email, password))
+			logdata = cur.fetchone()
+			print(logdata)
+			cur.close()
+			if logdata:
+				session['loggedin'] = True
+				session['name'] = logdata[1]
+				return redirect('/')
+			else:
+				msg = "Incorrect username or password !! "
+				return render_template('teacherLogin.html', msg = msg)
+		return render_template('teacherLogin.html', msg = msg)
 
 @app.route('/')
 def home():
-    return render_template("teacherHome.html")
+	if 'loggedin' in session:
+		return render_template('teacherHome.html')
+	else:
+		return redirect('/login')
+
 
 @app.route('/createQuiz', methods = ['GET', 'POST'])
 def createQuiz():
     return render_template("creatQuiz.html")
+
+
+@app.route('/logout')
+def logout():
+    session.pop('loggedin', None)
+    session.pop('name', None)
+    return redirect('/login')
 
 #------------------------##------------------------##------------------------##------------------------#
 #                                STUDENT PART                                                          #
