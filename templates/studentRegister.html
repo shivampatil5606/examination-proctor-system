@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Proctor System</title>
+</head>
+<body bgcolor="#66b3f2">
+
+<div>
+    <h2>Register for Exam</h2>
+    {% if msg=="" %}
+        {{ continue }}
+    {% else %}
+        <span style="color: red;">{{ msg }}</span>
+    {% endif %}
+    <form method="POST" action="{{ url_for('studentRegister') }}">
+        <div>
+            <input type="text" name="name" required>
+            <label>Name</label>
+        </div>
+        <div>
+            <input type="text" name="email" required>
+            <label>Email</label>
+        </div>
+        <div>
+            <input type="text" name="quizcode" required>
+            <label>Quiz Code</label>
+        </div>
+        <div>
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

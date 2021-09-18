@@ -66,7 +66,6 @@ def teacherLogin():
 			cur = mysql.connection.cursor()
 			cur.execute('select * from teachers where email = %s and password = %s', (email, password))
 			logdata = cur.fetchone()
-			print(logdata)
 			cur.close()
 			if logdata:
 				session['loggedin'] = True
@@ -123,16 +122,48 @@ def logout():
 #                                STUDENT PART                                                          #
 #------------------------##------------------------##------------------------##------------------------#     
 
-@app.route('/register')
+@app.route('/studentRegister', methods = ['GET', 'POST'])
 def studentRegister():
-    return render_template("studentRegister.html")
+	msg=""
+	if request.method == 'POST' and 'name' in request.form and 'email' in request.form and 'quizcode' in request.form:
+		details = request.form
+		name = details['name']
+		email = details['email']
+		quizcode = details['quizcode']
+		cur = mysql.connection.cursor()
+		cur.execute('select * from quizes where quizid = %s', (quizcode,))
+		logdata = cur.fetchone()
+		if logdata:
+			cur.execute('select * from students where email = %s and quizid = %s', (email, quizcode))
+			studata=cur.fetchone()
+			if studata:
+				msg="It seems you already attempted the test."
+				return render_template('studentRegister.html', msg = msg)
+			else:
+				cur.execute('insert into students(quizid,name,email) values (%s,%s,%s)',(quizcode,name, email))
+				mysql.connection.commit()
+				session['studentloggedin'] = True
+				session['name'] = name
+				session['quizid']=quizcode
+				return redirect('/studentQuiz')
+		else:
+			msg = "The quiz doesn't exist. Please insert the correct quiz id!"
+			return render_template('studentRegister.html', msg = msg)
+	return render_template('studentRegister.html', msg = msg)
 
-@app.route('/quiz', methods = ['GET', 'POST'])
+@app.route('/studentQuiz', methods = ['GET', 'POST'])
 def quiz():
-    return render_template("studentQuiz.html")
+	if 'studentloggedin' in session:
+		cur = mysql.connection.cursor()
+		cur.execute('select * from questions where qid = %s', (session['quizid'],))
+		questions = cur.fetchall()
+		print(questions)
+		return render_template("studentQuiz.html",questions=questions)
+	else:
+		return redirect('/studentRegister')
 
-@app.route('/results')
-def results():
+@app.route('/studentResults')
+def studentResults():
     return render_template("studentResults.html")
 
 def gen_frames():

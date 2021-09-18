@@ -16,6 +16,29 @@
         <h3>Detecting Face .....</h3>
         <img src="{{ url_for('video_feed') }}" width="100%">
     </div>
+    <br>
+    <table style="border: 1px solid red;">
+        <thead>
+            <tr>
+                <th>Questions</th>
+                <th>Option 1</th>
+                <th>Option 2</th>
+                <th>Option 3</th>
+                <th>Option 4</th>
+            </tr>
+        </thead>
+        <tbody>
+        {%for i in questions%}
+            <tr>
+                <th>{{i[1]}}</th>
+                <th>{{i[2]}}</th>
+                <th>{{i[3]}}</th>
+                <th>{{i[4]}}</th>
+                <th>{{i[5]}}</th>
+            </tr>       
+        {%endfor%}
+        </tbody>
+    </table>
 
 </body>
 </html>

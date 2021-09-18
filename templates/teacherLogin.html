@@ -14,7 +14,7 @@
     {% else %}
         <span style="color: red;">{{ msg }}</span>
     {% endif %}
-    <form method="POST" action="/login">
+    <form method="POST" action="{{ url_for('teacherLogin')}}">
         <div>
             <input type="text" name="email" required>
             <label>Email</label>
