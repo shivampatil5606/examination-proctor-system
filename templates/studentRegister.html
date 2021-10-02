@@ -3,35 +3,76 @@
 <head>
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 	<title>Proctor System</title>
 </head>
-<body bgcolor="#66b3f2">
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #133C55;">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Proctor System</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ url_for('mainHome') }}">Home</a>
+              </li>
+            </ul>
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('teacherLogin') }}">Teacher Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="#">Student Registration</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
 
-<div>
+<div class="text-center container shadow-lg p-3 mt-5 bg-body rounded vw-100">
     <h2>Register for Exam</h2>
+    <hr>
     {% if msg=="" %}
         {{ continue }}
     {% else %}
-        <span style="color: red;">{{ msg }}</span>
+    <div class="alert alert-danger alert-dismissible fade show mx-auto w-50" role="alert">
+      <span>{{ msg }}</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     {% endif %}
     <form method="POST" action="{{ url_for('studentRegister') }}">
-        <div>
-            <input type="text" name="name" required>
-            <label>Name</label>
-        </div>
-        <div>
-            <input type="text" name="email" required>
-            <label>Email</label>
-        </div>
-        <div>
-            <input type="text" name="quizcode" required>
-            <label>Quiz Code</label>
-        </div>
-        <div>
-            <input type="submit" value="Submit">
-        </div>
+      <div class="form-floating mb-2 mx-auto w-50">
+        <input type="text" name="name" class="form-control" placeholder="Shivam Patil" required data-bs-toggle="tooltip" data-bs-placement="right" title="Please fill your full name.">
+        <label>Name</label>
+      </div>
+      <div class="form-floating mb-2 mx-auto w-50">
+        <input type="email" name="email" class="form-control" placeholder="name@example.com" required data-bs-toggle="tooltip" data-bs-placement="right" title="Enter email in correct format(name@example.com)">
+        <label>Email address</label>
+      </div>  
+      <div class="form-floating mb-2 mx-auto w-50">
+        <input type="tel" name="quizcode" class="form-control" placeholder="12345678" required data-bs-toggle="tooltip" data-bs-placement="right" title="Please contact your teacher for 8 digits quiz code.">
+        <label>Quiz Code</label><span class="text-danger">Please contact your teacher for 8 digits quiz code.</span>
+      </div>        
+      <button type="submit" class="btn btn-outline-primary w-25">Submit</button>
     </form>
 </div>
+<div class="container mt-5" >
+  <h4 class="mx-5">Instructions  </h4>
+  <ol class="mx-5">
+    <li class="text-danger">For quiz code contact your teacher.</li>
+    <li>You can give a particular test only once.</li>
+    <li>The timer for the test will be on server side. The test will be auto-submitted after the timer ends</li>
+    <li>Students are recommended to join atleast 5 mins before the exam </li>
+    <li>Please give the camera access.</li>
+    <li>If you get error like <span class="text-danger">"It seems you already attempted the test."</span>, you must have gave that quiz before and so you cant attempt it again.  </li>
+    <li>If you get error like <span class="text-danger">"Please check the quiz time properly."</span>, you must check the quiz time with your teacher.</li>
+    
+  </ol>
+</div>
+
 
 </body>
 </html>
