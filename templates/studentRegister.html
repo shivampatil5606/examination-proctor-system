@@ -7,7 +7,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 	<title>Proctor System</title>
 </head>
-<body>
+<body onload="myFunction()">
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #133C55;">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Proctor System</a>
@@ -43,6 +43,12 @@
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endif %}
+    <div id="cameraerror" class="alert alert-danger fade show mx-auto w-50" role="alert" style="display: none;">
+      <span>Please turn on the camera permission. Follow this <a href="https://utlv.screenstepslive.com/s/faculty/m/54123/l/984966-enabling-microphone-and-camera-use-in-web-browsers" target="_blank">link</a> to know how</span>
+    </div>
+    <div id="cameraerror1" class="alert alert-success fade show mx-auto w-50" role="alert" style="display: none;">
+      <span>Camera turned on. All set to go!!!!!</span>
+    </div>
     <form method="POST" action="{{ url_for('studentRegister') }}">
       <div class="form-floating mb-2 mx-auto w-50">
         <input type="text" name="name" class="form-control" placeholder="Shivam Patil" required data-bs-toggle="tooltip" data-bs-placement="right" title="Please fill your full name.">
@@ -72,6 +78,21 @@
     
   </ol>
 </div>
+<script>
+  function myFunction() {
+      if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function (stream) {
+        var ele=document.getElementById('cameraerror1');
+        ele.style.display="block";
+        })
+        .catch(function (err0r) {
+          var ele=document.getElementById('cameraerror');
+          ele.style.display="block";
+        });
+    }
+  }
+</script>
 
 
 </body>

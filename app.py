@@ -177,12 +177,14 @@ def studentRegister():
 					session['studentloggedin'] = True
 					session['name'] = (name,email)
 					session['quizid']=quizcode
+					session['endtime']=logdata[4].strftime("%d/%m/%Y, %H:%M:%S")
+					print(logdata[4])
 					return redirect('/studentQuiz')
 			else:
 				msg = "The quiz doesn't exist. Please insert the correct quiz id!"
 		return render_template('studentRegister.html', msg = msg)
 	else:
-		return redirect("url_for('studentQuiz')")
+		return redirect(url_for('studentQuiz'))
 
 
 @app.route('/studentQuiz', methods = ['GET', 'POST'])
@@ -191,6 +193,10 @@ def studentQuiz():
 		cur = mysql.connection.cursor()
 		cur.execute('select * from questions where qid = %s', (session['quizid'],))
 		questions = cur.fetchall()
+		cur.execute('select * from studentans where quizid = %s and email=%s', (session['quizid'],session['name'][1],))
+		check = cur.fetchall()
+		if check:
+			return render_template("studentQuiz.html",questions=questions)
 		# print(questions)
 		for i in questions:
 			cur.execute('insert into studentans(quizid,email,questionid,cans) values (%s,%s,%s,%s)',(session['quizid'],session['name'][1], i[7],i[6]))
@@ -230,6 +236,7 @@ def studentResults():
 			session.pop('studentloggedin',None)
 			session.pop('name',None)
 			session.pop('quizid',None)
+			session.pop('endtime',None)
 			return render_template("studentResults.html",res=finalResult,quizname=quizname,sname=sname,id1=id1)
 	return redirect('/studentRegister')
 
@@ -238,13 +245,18 @@ def gen_frames():
 	camera = cv2.VideoCapture(0,cv2.CAP_DSHOW)  
 	while True:
 		success, img = camera.read()  # read the camera frame
-		face_rects=face_cascade.detectMultiScale(img,1.2,5)
-		for (x,y,w,h) in face_rects:
-			cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
-			# encode OpenCV raw frame to jpg and displaying it
-		ret, jpeg = cv2.imencode('.jpg', img)
-		frame = jpeg.tobytes()
-		yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+		if success:
+			face_rects=face_cascade.detectMultiScale(img,1.2,5)
+			for (x,y,w,h) in face_rects:
+				cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
+				# encode OpenCV raw frame to jpg and displaying it
+			ret, jpeg = cv2.imencode('.jpg', img)
+			frame = jpeg.tobytes()
+			time.sleep(2)
+			yield (b'--frame\r\n'b'Cont  ent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+		else:
+			print("camera not found")
+			return "Camera not found"
 
 @app.route('/video_feed')
 def video_feed():
